@@ -2,7 +2,7 @@
 
 int main() {
     srand(time(NULL));
-    int n;
+    int n = 10;
     printf("Enter the size of the graph: ");
     getInt(&n);
     node* adjlist = (node*)malloc(n * sizeof(node));
@@ -14,7 +14,7 @@ int main() {
         getInt(&command);
         switch(command) {
             case 0:
-              //  deleteTree(root);
+                deleteGraph(adjlist, n);
                 break;
             case 1:
                 addNode(&adjlist, &n);
@@ -25,9 +25,13 @@ int main() {
             case 3:
                 addEdge(adjlist, n);
                 break;
+            case 4:
+                deleteEdge(adjlist, n);
+                break;
             default:
                 printf("Error!\n");
         }
     } while(command != 0);
+    free(adjlist);
     return 0;
 }

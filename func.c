@@ -62,6 +62,7 @@ void genlistAdj(node* adjlist, int n) {
                     adjlist[i].next->x = xcoord;
                     adjlist[i].next->y = ycoord;
                     adjlist[i].next->ind = j;
+                    adjlist[i].next->next = NULL;
                  //   printf("!X: %d, Y: %d\n", adjlist[i].next->x, adjlist[i].next->y);
                 }
                 else {
@@ -107,6 +108,7 @@ void addNode(node** adjlist, int* n) {
     *adjlist = (node*)realloc(*adjlist, (*n + 1) * sizeof(node));
     (*adjlist)[*n].x = x;
     (*adjlist)[*n].y = y;
+    (*adjlist)[*n].ind = *n;
     (*adjlist)[*n].next = NULL;
     *n = *n + 1;
 }
@@ -119,19 +121,23 @@ void addEdge(node* adjlist, int n) {
     printf("Enter the second vertex of the edge: ");
     getInt(&finish);
     finish--;
-    if (start >= n || finish >= n || start < 0 || finish < 0) {
+    if (start >= n || finish >= n || start < 0 || finish < 0 || (start == finish)) {
         printf("Incorrect input!\n");
         return;
     }
     node* tmp;
     tmp = &adjlist[start];
-    do {
+    while (tmp->next != NULL) {
         if (tmp->ind == finish) {
             printf("Error! That edge is already exist!\n");
             return;
         }
         tmp = tmp->next;
-    } while (tmp->next != NULL);
+    }
+    if (tmp->ind == finish) {
+        printf("Error! That edge is already exist!\n");
+        return;
+    }
     node* add;
     add = (node*)malloc(sizeof(node));
     int dist = (adjlist[start].x - adjlist[finish].x) * (adjlist[start].x - adjlist[finish].x) + (adjlist[start].y - adjlist[finish].y) * (adjlist[start].y - adjlist[finish].y);
@@ -141,4 +147,57 @@ void addEdge(node* adjlist, int n) {
     add->next = adjlist[start].next;
     add->ind = finish;
     adjlist[start].next = add;
+}
+
+void deleteEdge(node* adjlist, int n) {
+    int start, finish;
+    printf("Enter the first vertex of the edge: ");
+    getInt(&start);
+    start--;
+    printf("Enter the second vertex of the edge: ");
+    getInt(&finish);
+    finish--;
+    if (start >= n || finish >= n || start < 0 || finish < 0 || (start == finish)) {
+        printf("Incorrect input!\n");
+        return;
+    }
+    node* tmp;
+    node* new;
+    tmp = &adjlist[start];
+    while (tmp->next != NULL) {
+        if (tmp->next->ind == finish) {
+            if (tmp->next->next != NULL) {
+               new = tmp->next->next;
+               free(tmp->next);
+               tmp->next = new;
+               return;
+            }
+            else {
+                free(tmp->next);
+                tmp->next = NULL;
+                return;
+            }
+        }
+        tmp = tmp->next;
+    }
+    printf("Error! That edge was not found!\n");
+}
+
+void deleteGraph(node* adjlist, int n) {
+    node* del;
+    for (int i = 0; i < n; i++) {
+        if (adjlist[i].next) {
+            while (adjlist[i].next != NULL) {
+                if (adjlist[i].next->next != NULL) {
+                    del = adjlist[i].next->next;
+                    free(adjlist[i].next);
+                    adjlist[i].next = del;
+                }
+                else {
+                    free(adjlist[i].next);
+                    adjlist[i].next = NULL;
+                }
+            }
+        }
+    }
 }
