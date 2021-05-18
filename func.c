@@ -83,7 +83,7 @@ void printList(node* adjlist, int n) {
     node *tmp;
     for (int i = 0; i < n; i++) {
         tmp = &adjlist[i];
-        printf("Vertex #%d: X: %d, Y: %d\n", i + 1, tmp->x, tmp->y);
+        printf("Vertex #%d: X: %d, Y: %d\n", tmp->ind + 1, tmp->x, tmp->y);
         while (tmp->next != NULL) {
             tmp = tmp->next;
             printf("X: %d, Y: %d, Index: %d\n", tmp->x, tmp->y, tmp->ind);
@@ -149,7 +149,7 @@ void addEdge(node* adjlist, int n) {
     adjlist[start].next = add;
 }
 
-void deleteEdge(node* adjlist, int n) {
+void getInfo(node* adjlist, int n) {
     int start, finish;
     printf("Enter the first vertex of the edge: ");
     getInt(&start);
@@ -161,6 +161,10 @@ void deleteEdge(node* adjlist, int n) {
         printf("Incorrect input!\n");
         return;
     }
+    deleteEdge(adjlist, n, start, finish);
+}
+
+void deleteEdge(node* adjlist, int n, int start, int finish) {
     node* tmp;
     node* new;
     tmp = &adjlist[start];
@@ -180,7 +184,7 @@ void deleteEdge(node* adjlist, int n) {
         }
         tmp = tmp->next;
     }
-    printf("Error! That edge was not found!\n");
+    // printf("Error! That edge was not found!\n");
 }
 
 void deleteGraph(node* adjlist, int n) {
@@ -199,5 +203,36 @@ void deleteGraph(node* adjlist, int n) {
                 }
             }
         }
+    }
+}
+
+void deleteNode(node** adjlist, int* n) {
+    int del;
+    printf("Enter the vertex which you want to delete: ");
+    getInt(&del);
+    del--;
+    node tmp;
+    node *delete;
+    tmp = (*adjlist)[del];
+    (*adjlist)[del] = (*adjlist)[*n - 1];
+    (*adjlist)[*n - 1] = tmp;
+    if ((*adjlist)[*n - 1].next) {
+        while ((*adjlist)[*n - 1].next != NULL)
+        {
+            if ((*adjlist)[*n - 1].next->next != NULL) {
+                delete = (*adjlist)[*n - 1].next->next;
+                free((*adjlist)[*n - 1].next);
+                (*adjlist)[*n - 1].next = delete;
+            }
+            else {
+                free((*adjlist)[*n - 1].next);
+                (*adjlist)[*n - 1].next = NULL;
+            }
+        }
+    }
+    *adjlist = (node*)realloc(*adjlist, (*n - 1) * sizeof(node));
+    *n = *n - 1;
+    for (int i = 0; i < *n; i++) {
+        deleteEdge(*adjlist, *n, i, del);
     }
 }

@@ -26,7 +26,10 @@ int main() {
                 addEdge(adjlist, n);
                 break;
             case 4:
-                deleteEdge(adjlist, n);
+                getInfo(adjlist, n);
+                break;
+            case 5:
+                deleteNode(&adjlist, &n);
                 break;
             default:
                 printf("Error!\n");
