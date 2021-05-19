@@ -2,9 +2,10 @@
 
 int main() {
     srand(time(NULL));
-    int n = 10;
+    int n, counter;
     printf("Enter the size of the graph: ");
     getInt(&n);
+    counter = n;
     node* adjlist = (node*)malloc(n * sizeof(node));
     genlistAdj(adjlist, n);
     int command;
@@ -17,19 +18,28 @@ int main() {
                 deleteGraph(adjlist, n);
                 break;
             case 1:
-                addNode(&adjlist, &n);
+                addNode(&adjlist, &n, counter);
+                counter++;
+                printf("N: %d\n", n);
                 break;
             case 2:
                 printList(adjlist, n);
                 break;
             case 3:
-                addEdge(adjlist, n);
+                addEdge(adjlist, n, counter);
                 break;
             case 4:
                 getInfo(adjlist, n);
                 break;
             case 5:
                 deleteNode(&adjlist, &n);
+                printf("N: %d\n", n);
+                break;
+            case 6:
+                dfs(adjlist, n);
+                break;
+            case 7:
+                bellman_ford(adjlist, n);
                 break;
             default:
                 printf("Error!\n");
