@@ -93,12 +93,16 @@ void printList(node* adjlist, int n) {
     }
 }
 
-void addNode(node** adjlist, int* n, int counter) {
+void getInfoNode(node *adjlist, int* n, int counter) {
     int x, y;
     printf("Enter the x coord: ");
     getInt(&x);
     printf("Enter the y coord: ");
     getInt(&y);
+    addNode(&adjlist, n, counter, x, y);
+}
+
+void addNode(node** adjlist, int* n, int counter, int x, int y) {
     for (int i = 0; i < *n; i++) {
         if ((*adjlist)[i].x == x &&  (*adjlist)[i].y == y) {
             printf("Error! It is impossible to add that vertex!\n");
@@ -113,7 +117,7 @@ void addNode(node** adjlist, int* n, int counter) {
     *n = *n + 1;
 }
 
-void addEdge(node* adjlist, int n, int counter) {
+void getInfoEdge(node* adjlist, int n, int counter) {
     int start, finish, show = -1, fin = -1;
     printf("Enter the first vertex of the edge: ");
     getInt(&start);
@@ -139,6 +143,10 @@ void addEdge(node* adjlist, int n, int counter) {
         }
     }
     if (fin == -1) return;
+    addEdge(adjlist, show, fin);
+}
+
+void addEdge(node* adjlist, int show, int fin) {
     node* tmp;
     tmp = &adjlist[show];
     while (tmp->next != NULL) {
@@ -266,7 +274,7 @@ void deleteNode(node** adjlist, int* n) {
     }
 }
 
-void dfs(node* adjlist, int n) {
+void start_dfs(node* adjlist, int n) {
     int start, finish, show = -1, fin = -1;
     printf("Enter the first node: ");
     getInt(&start);
@@ -288,11 +296,15 @@ void dfs(node* adjlist, int n) {
         }
     }
     if (fin == -1) return;
+    dfs(adjlist, n, show, fin);
+}
+
+void dfs(node* adjlist, int n, int show, int fin) {
     int colors[n];
     for (int i = 0; i < n; i++) {
         colors[i] = 0;
     }
-    dfs_check(adjlist, colors, n, show);
+    dfs_check_modified(adjlist, colors, n, show);
    /* for (int i = 0; i < n; i++) {
         printf("color #%d: %d\n", i + 1, colors[i]);
     } */
@@ -334,8 +346,30 @@ void dfs_check(node* adjlist, int* colors, int n, int ind) {
     colors[ind] = 2;
 }
 
-void bellman_ford(node* adjlist, int n) {
-    int start, finish, show = -1, fin = -1, weight, get_index;
+void dfs_check_modified(node* adjlist, int* colors, int n, int ind) {
+    colors[ind] = 1;
+    node *tmp;
+    int get_index;
+    tmp = &adjlist[ind];
+    if (tmp->next) {
+        tmp = tmp->next;
+        while (tmp->next != NULL) {
+            get_index = tmp->name;
+            if (colors[get_index] == 0) {
+                dfs_check_modified(adjlist, colors, n, get_index);
+            }
+            tmp = tmp->next;
+        }
+        get_index = tmp->name;
+        if (colors[get_index] == 0) {
+            dfs_check_modified(adjlist, colors, n, get_index);
+        }
+    }
+    colors[ind] = 2;
+}
+
+void start_bellman_ford(node* adjlist, int n) {
+    int start, finish, show = -1, fin = -1;
     printf("Enter the first node: ");
     getInt(&start);
     printf("Enter the second node: ");
@@ -356,6 +390,11 @@ void bellman_ford(node* adjlist, int n) {
         }
     }
     if (fin == -1) return;
+    bellman_ford(adjlist, n, show, fin);
+}
+
+void bellman_ford(node* adjlist, int n, int show, int fin) {
+    int weight, get_index;
     int dist[n];
     for (int i = 0; i < n; i++) {
         dist[i] = 1000000;
@@ -389,4 +428,112 @@ void bellman_ford(node* adjlist, int n) {
     else {
         printf("The min distance: %d\n", dist[fin]);
     }
+}
+
+void Ford_Fulkerson(node* adjlist, int n) {
+    int start, finish, show = -1, fin = -1, weight, get_index;
+    printf("Enter the first node: ");
+    getInt(&start);
+    printf("Enter the second node: ");
+    getInt(&finish);
+    start--;
+    finish--;
+    for (int i = 0; i < n; i++) {
+        if (adjlist[i].name == start) {
+            show = i;
+            break;
+        }
+    }
+    if (show == -1) return;
+    for (int i = 0; i < n; i++) {
+        if (adjlist[i].name == finish) {
+            fin = i;
+            break;
+        }
+    }
+    if (fin == -1) return;
+
+}
+
+int timing_func() {
+    clock_t first, last;
+    int n = 10, start, finish;
+    while (n-- > 0) {
+        node *temporary = (node*)malloc(10000 * sizeof(node));
+        genlistAdj(temporary, 10000);
+        start = rand() % 10;
+        finish = rand() % 10;
+        first = clock();
+        dfs(temporary, 10000, start, finish);
+        last = clock();
+        printf("test #%d, number of nodes = %d, time = %lf\n", 10 - n, 10000, (double)(last - first) / CLOCKS_PER_SEC);
+        deleteGraph(temporary, 10000);
+        free(temporary);
+    }
+}
+
+int load(node **root) {
+    FILE *fd = fopen("GraphNodes.txt", "r+b");
+    fseek(fd, 0, SEEK_END);
+    long end = ftell(fd);
+    int n = 0, x, y, first, second;
+    fseek(fd, 0, SEEK_SET);
+    while(ftell(fd) != end) {
+        n++;
+        fread(&x, sizeof(int), 1, fd);
+        fread(&y, sizeof(int), 1, fd);
+        printf("X: %d Y: %d\n", x, y);
+        *root = (node*)realloc(*root, n * sizeof(node));
+        (*root)[n - 1].x = x;
+        (*root)[n - 1].y = y;
+        (*root)[n - 1].name = n - 1;
+        (*root)[n - 1].next = NULL;
+    }
+    fclose(fd);
+    FILE *sfd = fopen("GraphEdges.txt", "r+b");
+    fseek(sfd, 0, SEEK_END);
+    end = ftell(sfd);
+    fseek(fd, 0, SEEK_SET);
+    while(ftell(fd) != end) {
+        fread(&first, sizeof(int), 1, sfd);
+        fread(&second, sizeof(int), 1, sfd);
+        addEdge(*root, first, second);
+    }
+    fclose(sfd);
+    return n;
+}
+
+void save_edges(node* adjlist, int n, FILE *fd) {
+    node* tmp;
+    for (int i = 0; i < n; i++) {
+        tmp = &adjlist[i];
+        if (tmp->next) {
+            tmp = tmp->next;
+            while (tmp->next != NULL) {
+                fwrite(&i, sizeof(int), 1, fd);
+                fwrite(&tmp->name, sizeof(int), 1, fd);
+                tmp = tmp->next;
+            }
+            fwrite(&i, sizeof(int), 1, fd);
+            fwrite(&tmp->name, sizeof(int), 1, fd);
+        }
+    }
+}
+
+void save_nodes(node* adjlist, int n, FILE* fd) {
+    node* tmp;
+    for (int i = 0; i < n; i++) {
+        tmp = &adjlist[i];
+        fwrite(&tmp->x, sizeof(int), 1, fd);
+        fwrite(&tmp->y, sizeof(int), 1, fd);
+    }
+}
+
+int save(node* root, int n) {
+    FILE *fd = fopen("GraphNodes.txt", "w+b");
+    save_nodes(root, n, fd);
+    fclose(fd);
+    FILE *sfd = fopen("GraphEdges.txt", "w+b");
+    save_edges(root, n, sfd);
+    fclose(sfd);
 }

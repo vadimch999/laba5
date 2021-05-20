@@ -18,7 +18,7 @@ int main() {
                 deleteGraph(adjlist, n);
                 break;
             case 1:
-                addNode(&adjlist, &n, counter);
+                getInfoNode(adjlist, &n, counter);
                 counter++;
                 printf("N: %d\n", n);
                 break;
@@ -26,7 +26,7 @@ int main() {
                 printList(adjlist, n);
                 break;
             case 3:
-                addEdge(adjlist, n, counter);
+                getInfoEdge(adjlist, n, counter);
                 break;
             case 4:
                 getInfo(adjlist, n);
@@ -36,10 +36,22 @@ int main() {
                 printf("N: %d\n", n);
                 break;
             case 6:
-                dfs(adjlist, n);
+                start_dfs(adjlist, n);
                 break;
             case 7:
-                bellman_ford(adjlist, n);
+                start_bellman_ford(adjlist, n);
+                break;
+            case 8:
+                break;
+            case 9:
+                timing_func();
+                break;
+            case 10:
+                deleteGraph(adjlist, n);
+                n = load(&adjlist);
+                break;
+            case 11:
+                save(adjlist, n);
                 break;
             default:
                 printf("Error!\n");
