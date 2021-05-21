@@ -7,7 +7,7 @@ int main() {
     getInt(&n);
     counter = n;
     node* adjlist = (node*)malloc(n * sizeof(node));
-    genlistAdj(adjlist, n);
+   genlistAdj(adjlist, n);
     int command;
     do {
         printf("%s", msg);
@@ -42,6 +42,7 @@ int main() {
                 start_bellman_ford(adjlist, n);
                 break;
             case 8:
+                Ford_Fulkerson(adjlist, n);
                 break;
             case 9:
                 timing_func();

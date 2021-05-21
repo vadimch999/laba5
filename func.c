@@ -37,7 +37,7 @@ char* getstr() {
 }
 
 void genlistAdj(node* adjlist, int n) {
-    int random, xcoord, ycoord;
+    int random, xcoord, ycoord, counter = 0;
     node tmp;
     for (int i = 0; i < n; i++) {
         xcoord = rand() % 100;
@@ -430,6 +430,28 @@ void bellman_ford(node* adjlist, int n, int show, int fin) {
     }
 }
 
+int min(int a, int b) {
+    if (a <= b) return a;
+    else return b;
+}
+
+int findPath(int **cap, int *used, int n, int u, int t, int f) {
+    if (u == t)
+        return f;
+    used[u] = 1;
+    for (int v = 0; v < n; v++) {
+        if (used[v] == 0 && cap[u][v] > 0) {
+            int df = findPath(cap, used, n, v, t, min(f, cap[u][v]));
+            if (df > 0) {
+                cap[u][v] -= df;
+                cap[v][u] += df;
+                return df;
+            }
+        }
+    }
+    return 0;
+}
+
 void Ford_Fulkerson(node* adjlist, int n) {
     int start, finish, show = -1, fin = -1, weight, get_index;
     printf("Enter the first node: ");
@@ -452,8 +474,61 @@ void Ford_Fulkerson(node* adjlist, int n) {
         }
     }
     if (fin == -1) return;
-
+    int **cap;
+    cap = malloc(n * sizeof(int*));
+    for (int i = 0; i < n; i++) {
+        cap[i] = malloc(sizeof(int) * n);
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cap[i][j] = 0;
+        }
+    }
+    node* tmp;
+    for (int i = 0; i < n; i++) {
+        tmp = &adjlist[i];
+        if (tmp->next) {
+            while (tmp->next != NULL) {
+                weight = (adjlist[i].x - tmp->x) * (adjlist[i].x - tmp->x) + (adjlist[i].y - tmp->y) * (adjlist[i].y - tmp->y);
+                get_index = tmp->name;
+                cap[i][get_index] = weight;
+                tmp = tmp->next;
+            }
+            get_index = tmp->name;
+            weight = (adjlist[i].x - tmp->x) * (adjlist[i].x - tmp->x) + (adjlist[i].y - tmp->y) * (adjlist[i].y - tmp->y);
+            cap[i][get_index] = weight;
+        }
+    }
+    int used[n];
+    for (int i = 0; i < n; i++) {
+        used[i] = 0;
+    }
+    int flow;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", cap[i][j]);
+        }
+        printf("\n");
+    }
+    for (flow = 0;;) {
+        int df = findPath(cap, used, n, show, fin, 10000000);
+        if (df == 0)
+            break;
+        flow += df;
+    }
+    printf("!!!!!   %d  !!!!!\n", flow);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", cap[i][j]);
+        }
+        printf("\n");
+    }
+    for (int i = 0; i < n; i++) {
+        free(cap[i]);
+    }
+    free(cap);
 }
+
 
 int timing_func() {
     clock_t first, last;

@@ -17,8 +17,6 @@ typedef struct node {
     struct node* next;
 } node;
 
-
-
 void getInt(int *a);
 char* getstr();
 void genlistAdj(node* adjlist, int n);
@@ -33,7 +31,7 @@ void dfs(node* adjlist, int n, int show, int fin);
 void dfs_check(node* adjlist, int* colors, int n, int ind);
 int find_ind(node *adjlist, int name, int n);
 void bellman_ford(node* adjlist, int n, int show, int fin);
-void Ford_Falkerson(node* adjlist, int n);
+void Ford_Fulkerson(node* adjlist, int n);
 int timing_func();
 void start_bellman_ford(node* adjlist, int n);
 void start_dfs(node* adjlist, int n);
